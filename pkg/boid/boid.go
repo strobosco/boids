@@ -1,39 +1,48 @@
 package boid
 
 import (
-	"boids/pkg/center"
-	"math"
+	"github.com/strobosco/boids/pkg/vector"
 )
 
+
+type Boids interface {
+	Update()
+}
+
 type Boid struct {
-	Vx int
-	Vy int
-	V int
-	O center.Center
+	ImageWidth int
+	ImageHeight int
+	V vector.Vector
+	O vector.Vector
 	Alfa int
 }
 
-func (boid *Boid) getVelocity() {
-	argument := math.Hypot(float64(boid.Vx), float64(boid.Vy))
-	boid.V = int(argument)
+const (
+	screenWidth  = 320
+	screenHeight = 240
+	maxAngle     = 256
+)
+
+func (s *Boid) Update() {
+	// fmt.Println("Update")
+	s.O.X += s.V.X
+	s.O.Y += s.V.Y
+	if s.O.X < 0 {
+		s.O.X = -s.O.X
+		s.V.X = -s.V.X
+	} else if mx := screenWidth - s.ImageWidth; mx <= s.O.X {
+		s.O.X = 2*mx - s.O.X
+		s.V.X = -s.V.X
+	}
+	if s.O.Y < 0 {
+		s.O.Y = -s.O.Y
+		s.V.Y = -s.V.Y
+	} else if my := screenHeight - s.ImageHeight; my <= s.O.Y {
+		s.O.Y = 2*my - s.O.Y
+		s.V.Y = -s.V.Y
+	}
+	s.Alfa++
+	if s.Alfa == maxAngle {
+		s.Alfa = 0
+	}
 }
-
-func (boid *Boid) getAlfa() {
-	argument := math.Hypot(float64(boid.Vx), float64(boid.Vy))
-	result := math.Acos(argument)
-	boid.Alfa = int(result)
-}
-
-// func (boid Boid) Orientation() int {
-// 	argument := math.Hypot(float64(boid.V.X), float64(boid.V.Y))
-// 	result := math.Acos(argument)
-// 	return int(result * 180 / math.Pi)
-// }
-
-// func (boid Boid) New(Vx, Vy, alfa int, O Center) {
-// 	boid.Vx = Vx
-// 	boid.Vy = Vy
-// 	boid.V = int(math.Hypot(float64(Vx), float64(Vy)))
-// 	boid.O = O
-// 	boid.Alfa = alfa
-// }
