@@ -7,6 +7,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -19,17 +20,18 @@ var (
 )
 
 const (
-	screenWidth = 320
-	screenHeight = 240
-	maxAngle     = 256
+	screenWidth          = 800
+	screenHeight         = 800
+	maxForce	= 1.0
 )
 
 type Game struct{
-	boids []*boid.Boid
+	boids []*boid.Boid // collection of boidss
 	op ebiten.DrawImageOptions
-	inited  bool
+	inited  bool // has the game initialized?
 }
 
+// general inizialiation that create the boids image 
 func init() {
 	fmt.Println("Loading image")
 	boid, _, err := ebitenutil.NewImageFromFile("../pkg/draw/chevron-up.png")
@@ -38,12 +40,6 @@ func init() {
 	}
 	fmt.Println("Image loaded")
 
-	// img, _, err := image.Decode(bytes.NewReader(images.Ebiten_png))
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// boid := ebiten.NewImageFromImage(img)
-
 	w, h := boid.Size()
 	boidImage = ebiten.NewImage(w, h)
 	op := &ebiten.DrawImageOptions{}
@@ -51,23 +47,30 @@ func init() {
 	boidImage.DrawImage(boid, op)
 }
 
+// Game inizialitaion func
 func (g *Game) init() {
 	defer func ()  {
-		g.inited = true
+		g.inited = true // init game
 	}()
 
+	// make boids
+	rand.Seed(time.Hour.Milliseconds())
 	g.boids = make([]*boid.Boid, 100)
+	// give boids random V (x; y), O (x; y), and Alfa
 	for i := range g.boids {
 		w, h := boidImage.Size()
-		x, y := rand.Intn(screenWidth-w), rand.Intn(screenHeight-h)
-		vx, vy := 2*rand.Intn(2)-1, 2*rand.Intn(2)-1	
-		a := rand.Intn(maxAngle)	
+		x, y := rand.Float64()*float64(screenWidth-w), rand.Float64()*float64(screenWidth-h)		
+		min, max := -maxForce, maxForce
+		vx, vy := rand.Float64()*(max-min)+min, rand.Float64()*(max-min)+min
 		g.boids[i] = &boid.Boid{
-			V: vector.Vector{X: int(vx), Y: int(vy)},
-			O: vector.Vector{X: int(x), Y: int(y)},
-			Alfa: a,
+			ImageWidth: w,
+			ImageHeight: h,
+			V: vector.Vector{X: vx, Y: vy},
+			O: vector.Vector{X: x, Y: y},
 		}
 	}
+
+	// fmt.Println(g.boids[0], g.boids[10], g.boids[50])
 	
 }
 
@@ -75,13 +78,13 @@ func (g *Game) Update() error {
 	if !g.inited {
 		g.init()
 	}
-
 	for i := range g.boids {
-		boid.Boids.Update(g.boids[i])
+		boid.Boids.Logic(g.boids[i], g.boids)
 	}
 	return nil
 }
 
+// draw the boids on screen
 func (g *Game) Draw(screen *ebiten.Image) {
 	screen.Fill(color.White)
 	w, h := boidImage.Size()
@@ -89,9 +92,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		s := g.boids[i]
 		g.op.GeoM.Reset()
 		g.op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
-		g.op.GeoM.Rotate(2 * math.Pi * float64(s.Alfa) / maxAngle)
-		g.op.GeoM.Translate(float64(w)/2, float64(h)/2)
-		g.op.GeoM.Translate(float64(s.O.X), float64(s.O.Y))
+		g.op.GeoM.Rotate(-1*math.Atan2(s.V.Y*-1, s.V.X) + math.Pi/2)
+		g.op.GeoM.Translate(s.O.X, s.O.Y)
 		screen.DrawImage(boidImage, &g.op)
 	}
 }
@@ -101,7 +103,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func Main() {
-	ebiten.SetWindowSize(screenWidth * 2, screenHeight * 2)
+	ebiten.SetWindowSize(screenWidth, screenHeight)
 	ebiten.SetWindowTitle("Boids")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
