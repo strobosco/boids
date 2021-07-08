@@ -20,9 +20,10 @@ var (
 )
 
 const (
-	screenWidth          = 800
-	screenHeight         = 800
+	screenWidth          = 400
+	screenHeight         = 400
 	maxForce	= 1.0
+	numBoids = 100
 )
 
 type Game struct{
@@ -34,7 +35,7 @@ type Game struct{
 // general inizialiation that create the boids image 
 func init() {
 	fmt.Println("Loading image")
-	boid, _, err := ebitenutil.NewImageFromFile("../pkg/draw/chevron-up.png")
+	boid, _, err := ebitenutil.NewImageFromFile("../pkg/draw/chevron.png")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,7 +56,7 @@ func (g *Game) init() {
 
 	// make boids
 	rand.Seed(time.Hour.Milliseconds())
-	g.boids = make([]*boid.Boid, 100)
+	g.boids = make([]*boid.Boid, numBoids)
 	// give boids random V (x; y), O (x; y), and Alfa
 	for i := range g.boids {
 		w, h := boidImage.Size()
@@ -69,7 +70,6 @@ func (g *Game) init() {
 			O: vector.Vector{X: x, Y: y},
 		}
 	}
-
 	// fmt.Println(g.boids[0], g.boids[10], g.boids[50])
 	
 }
@@ -79,6 +79,7 @@ func (g *Game) Update() error {
 		g.init()
 	}
 	for i := range g.boids {
+		// fmt.Println(g.boids[i])
 		boid.Boids.Logic(g.boids[i], g.boids)
 	}
 	return nil
@@ -103,7 +104,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func Main() {
-	ebiten.SetWindowSize(screenWidth, screenHeight)
+	ebiten.SetWindowSize(screenWidth * 2, screenHeight * 2)
 	ebiten.SetWindowTitle("Boids")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
