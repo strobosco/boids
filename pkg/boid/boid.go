@@ -17,14 +17,14 @@ type Boid struct {
 }
 
 const (
-	screenWidth          = 800
-	screenHeight         = 800
-	maxSpeed     = 4.0
-	maxForce	= 1.0
-	perceptionRadius = 200.0
-	separationIndex = 50.0
-	alignmentIndex = 75.0
-	cohesionIndex = 100.0
+	screenWidth				= 400
+	screenHeight    	= 400
+	maxSpeed     			= 4.0
+	maxForce					= 1.0
+	perceptionRadius 	= 100.0
+	separationIndex 	= 50.0
+	alignmentIndex 		= 75.0
+	cohesionIndex 		= 100.0
 )
 
 func (s *Boid) CheckEdges() {
@@ -45,13 +45,12 @@ func (s *Boid) FindNeighbors(boids []*Boid) ([]*Boid) {
 	neighbors := []*Boid{}
 
 	for _, neighbor := range boids {
-		if s.O.Distance(neighbor.O) <= perceptionRadius && s != neighbor {
+		if s.O.Distance(neighbor.O) < perceptionRadius && s != neighbor {
 			neighbors = append(neighbors, neighbor)
 		}
 	}
 
 	return neighbors
-
 }
 
 func (s *Boid) alignment(boids []*Boid) (vector.Vector) {
@@ -60,23 +59,25 @@ func (s *Boid) alignment(boids []*Boid) (vector.Vector) {
 	alignSteering := vector.Vector{}
 
 	for _, neighbor := range boids {
-		if s.O.Distance(neighbor.O) < alignmentIndex {
+		if s.O.Distance(neighbor.O) < alignmentIndex && s != neighbor {
 			alignSteering.X += neighbor.V.X
 			alignSteering.Y += neighbor.V.Y
 			count++
 		}
 	}
 
-	alignSteering.X /= count
-	alignSteering.Y /= count
-
-	alignSteering.SetMagnitude(maxSpeed)
-
-	alignSteering.X -= s.V.X
-	alignSteering.Y -= s.V.Y
-
-	alignSteering.Limit(maxForce)
-
+	if count > 0 {
+		alignSteering.X /= count
+		alignSteering.Y /= count
+	
+		alignSteering.SetMagnitude(maxSpeed)
+	
+		alignSteering.X -= s.V.X
+		alignSteering.Y -= s.V.Y
+	
+		alignSteering.Limit(maxForce)
+	}
+	
 	return alignSteering
 }
 
@@ -86,25 +87,27 @@ func (s *Boid) cohesion(boids []*Boid) (vector.Vector) {
 	cohesionSteering := vector.Vector{}
 
 	for _, neighbor := range boids {
-		if s.O.Distance(neighbor.O) < cohesionIndex {
+		if s.O.Distance(neighbor.O) < cohesionIndex && s != neighbor {
 			cohesionSteering.X += neighbor.O.X
 			cohesionSteering.Y += neighbor.O.Y
 			count++
 		}
 	}
 
-	cohesionSteering.X /= count
-	cohesionSteering.Y /= count
-
-	cohesionSteering.X -= s.O.X
-	cohesionSteering.Y -= s.O.Y
-
-	cohesionSteering.SetMagnitude(maxSpeed)
-
-	cohesionSteering.X -= s.V.X
-	cohesionSteering.Y -= s.V.Y
-
-	cohesionSteering.SetMagnitude(maxForce * 0.9)
+	if count > 0 {
+		cohesionSteering.X /= count
+		cohesionSteering.Y /= count
+	
+		cohesionSteering.X -= s.O.X
+		cohesionSteering.Y -= s.O.Y
+	
+		cohesionSteering.SetMagnitude(maxSpeed)
+	
+		cohesionSteering.X -= s.V.X
+		cohesionSteering.Y -= s.V.Y
+	
+		cohesionSteering.SetMagnitude(maxForce * 0.9)
+	}
 
 	return cohesionSteering
 }
@@ -115,31 +118,33 @@ func (s *Boid) separation(boids []*Boid) (vector.Vector) {
 	separationSteering := vector.Vector{}
 
 	for _, neighbor := range boids {
-		if d := s.O.Distance(neighbor.O); d < separationIndex {
+		if d := s.O.Distance(neighbor.O); d < separationIndex && s != neighbor {
 			diff := vector.Vector{}
 			diff = s.O
-
-			diff.X -= neighbor.O.X
-			diff.Y -= neighbor.O.Y
-
+			
+			diff.X = diff.X - neighbor.O.X
+			diff.Y = diff.Y - neighbor.O.Y
+			
 			diff.X /= d
 			diff.Y /= d
-
+			
 			separationSteering.X += diff.X
 			separationSteering.Y += diff.Y
 			count++
 		}
 	}
 
-	separationSteering.X /= count
-	separationSteering.Y /= count
-
-	separationSteering.SetMagnitude(maxSpeed)
-
-	separationSteering.X -= s.V.X
-	separationSteering.Y -= s.V.Y
-
-	separationSteering.SetMagnitude(maxForce * 1.2)
+	if count > 0 {
+		separationSteering.X /= count
+		separationSteering.Y /= count
+	
+		separationSteering.SetMagnitude(maxSpeed)
+	
+		separationSteering.X -= s.V.X
+		separationSteering.Y -= s.V.Y
+	
+		separationSteering.SetMagnitude(maxForce * 1.2)
+	}
 
 	return separationSteering
 }
@@ -148,7 +153,7 @@ func (s *Boid) move(alignment, separation, cohesion vector.Vector) {
 	
 	// Calculate new vector
 	acceleration := vector.Vector{}
-	
+
 	acceleration.X = (alignment.X + separation.X + cohesion.X ) / 3
 	acceleration.Y = (alignment.Y + separation.Y + cohesion.Y ) / 3
 
@@ -165,8 +170,6 @@ func (s *Boid) move(alignment, separation, cohesion vector.Vector) {
 }
 
 func (s *Boid) Logic(boids []*Boid) {
-	// fmt.Println(boids[0], boids[10], boids[50])
-
 	// Check boundaries
 	s.CheckEdges()
 
@@ -177,11 +180,9 @@ func (s *Boid) Logic(boids []*Boid) {
 	alignment := s.alignment(neighbors)
 
 	cohesion := s.cohesion(neighbors)
-
+	
 	separation := s.separation(neighbors)
-
+	
 	// Move boid
 	s.move(alignment, separation, cohesion)
-	// fmt.Println(boids[0], boids[10], boids[50])
-
 }
