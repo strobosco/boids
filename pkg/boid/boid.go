@@ -17,16 +17,17 @@ type Boid struct {
 }
 
 const (
-	screenWidth				= 400
-	screenHeight    	= 400
-	maxSpeed     			= 4.0
-	maxForce					= 1.0
-	perceptionRadius 	= 100.0
-	separationIndex 	= 50.0
-	alignmentIndex 		= 75.0
-	cohesionIndex 		= 100.0
+	screenWidth				= 400 // width of sim screen 
+	screenHeight    	= 400 // height of sim screen
+	maxSpeed     			= 4.0 // max boid speed
+	maxForce					= 1.0 // constant for boid movement
+	perceptionRadius 	= 100.0 // range at which boids can sense other boids
+	separationIndex 	= 50.0 // range at which separation is taken into account
+	alignmentIndex 		= 75.0 // range at which alignment is taken into account
+	cohesionIndex 		= 100.0 // range at which cohesion is taken into account
 )
 
+// Check if boid is inside screen
 func (s *Boid) CheckEdges() {
 	if s.O.X < 0 {
 		s.O.X = screenWidth
@@ -40,6 +41,7 @@ func (s *Boid) CheckEdges() {
 	}
 }
 
+// Find neighbors using perception radius
 func (s *Boid) FindNeighbors(boids []*Boid) ([]*Boid) {
 
 	neighbors := []*Boid{}
@@ -53,11 +55,15 @@ func (s *Boid) FindNeighbors(boids []*Boid) ([]*Boid) {
 	return neighbors
 }
 
+
+// Update the boids alignment
 func (s *Boid) alignment(boids []*Boid) (vector.Vector) {
 
 	count := 0.0
-	alignSteering := vector.Vector{}
+	alignSteering := vector.Vector{} // vector that will update alignment
 
+
+	// Check if each neighbor is within alignment radius
 	for _, neighbor := range boids {
 		if s.O.Distance(neighbor.O) < alignmentIndex && s != neighbor {
 			alignSteering.X += neighbor.V.X
@@ -66,26 +72,31 @@ func (s *Boid) alignment(boids []*Boid) (vector.Vector) {
 		}
 	}
 
+	// Initially steering vectors are the sum of all alignments, which are then:
 	if count > 0 {
+		// Averaged over the entire number of boids within alignment radius
 		alignSteering.X /= count
 		alignSteering.Y /= count
 	
 		alignSteering.SetMagnitude(maxSpeed)
 	
+		// Remove the boids direction as it would bias the end result
 		alignSteering.X -= s.V.X
 		alignSteering.Y -= s.V.Y
 	
-		alignSteering.Limit(maxForce)
+		alignSteering.Limit(maxForce) // limited to the max force
 	}
 	
 	return alignSteering
 }
 
+// Check cohesion between boids
 func (s *Boid) cohesion(boids []*Boid) (vector.Vector) {
 
 	count := 0.0
-	cohesionSteering := vector.Vector{}
+	cohesionSteering := vector.Vector{} // vector with the mean position of neighboring boids
 
+	// Check if neighbors are withing cohesion radius
 	for _, neighbor := range boids {
 		if s.O.Distance(neighbor.O) < cohesionIndex && s != neighbor {
 			cohesionSteering.X += neighbor.O.X
@@ -112,6 +123,7 @@ func (s *Boid) cohesion(boids []*Boid) (vector.Vector) {
 	return cohesionSteering
 }
 
+// Check separation between boids
 func (s *Boid) separation(boids []*Boid) (vector.Vector) {
 
 	count := 0.0
@@ -149,6 +161,7 @@ func (s *Boid) separation(boids []*Boid) (vector.Vector) {
 	return separationSteering
 }
 
+// After applying rules with previous functions, move the boid
 func (s *Boid) move(alignment, separation, cohesion vector.Vector) {
 	
 	// Calculate new vector
