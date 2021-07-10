@@ -20,10 +20,10 @@ var (
 )
 
 const (
-	screenWidth          = 400
-	screenHeight         = 400
-	maxForce	= 1.0
-	numBoids = 100
+	screenWidth			= 400 // width of sim screen
+	screenHeight    = 400 // height of sim screen
+	maxForce				= 1.0 // constant for boid speed/movement
+	numBoids 				= 250 // number of boids
 )
 
 type Game struct{
@@ -42,7 +42,7 @@ func init() {
 	fmt.Println("Image loaded")
 
 	w, h := boid.Size()
-	boidImage = ebiten.NewImage(w, h)
+	boidImage = ebiten.NewImage(w / 2, h / 2)
 	op := &ebiten.DrawImageOptions{}
 	op.ColorM.Scale(1, 1, 1, 1)
 	boidImage.DrawImage(boid, op)
@@ -54,32 +54,32 @@ func (g *Game) init() {
 		g.inited = true // init game
 	}()
 
-	// make boids
+	// create slice of boids
 	rand.Seed(time.Hour.Milliseconds())
 	g.boids = make([]*boid.Boid, numBoids)
-	// give boids random V (x; y), O (x; y), and Alfa
+
+	// give boids random V (x; y), O (x; y) and assign image width and height
 	for i := range g.boids {
 		w, h := boidImage.Size()
-		x, y := rand.Float64()*float64(screenWidth-w), rand.Float64()*float64(screenWidth-h)		
+		x, y := rand.Float64()*float64(screenWidth-w/2), rand.Float64()*float64(screenWidth-h/2)		
 		min, max := -maxForce, maxForce
 		vx, vy := rand.Float64()*(max-min)+min, rand.Float64()*(max-min)+min
 		g.boids[i] = &boid.Boid{
-			ImageWidth: w,
-			ImageHeight: h,
+			ImageWidth: w/2,
+			ImageHeight: h/2,
 			V: vector.Vector{X: vx, Y: vy},
 			O: vector.Vector{X: x, Y: y},
 		}
 	}
-	// fmt.Println(g.boids[0], g.boids[10], g.boids[50])
 	
 }
 
+// Update the boids position
 func (g *Game) Update() error {
 	if !g.inited {
 		g.init()
 	}
 	for i := range g.boids {
-		// fmt.Println(g.boids[i])
 		boid.Boids.Logic(g.boids[i], g.boids)
 	}
 	return nil
@@ -92,7 +92,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for i := 0; i < len(g.boids); i++ {
 		s := g.boids[i]
 		g.op.GeoM.Reset()
-		g.op.GeoM.Translate(-float64(w)/2, -float64(h)/2)
+		g.op.GeoM.Translate(-float64(w/2)/2, -float64(h/2)/2)
 		g.op.GeoM.Rotate(-1*math.Atan2(s.V.Y*-1, s.V.X) + math.Pi/2)
 		g.op.GeoM.Translate(s.O.X, s.O.Y)
 		screen.DrawImage(boidImage, &g.op)
