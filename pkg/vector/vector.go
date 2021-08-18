@@ -4,10 +4,13 @@ import (
 	"math"
 )
 
+// * Vector struct
 type Vector struct {
 	X float64
 	Y float64
 }
+
+// * Vector math used in calculating the boids movements
 
 func (v *Vector) Limit(max float64) {
 	magSq := v.MagnitudeSquared()
@@ -38,7 +41,7 @@ func (v *Vector) SetMagnitude(z float64) {
 }
 
 func (v *Vector) Normalize() {
-	mag := math.Sqrt(v.X * v.X + v.Y * v.Y)
+	mag := math.Sqrt(v.X*v.X + v.Y*v.Y)
 	v.X /= mag
 	v.Y /= mag
 }

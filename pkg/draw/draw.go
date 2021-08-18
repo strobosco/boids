@@ -20,19 +20,19 @@ var (
 )
 
 const (
-	screenWidth			= 400 // width of sim screen
-	screenHeight    = 400 // height of sim screen
-	maxForce				= 1.0 // constant for boid speed/movement
-	numBoids 				= 250 // number of boids
+	screenWidth  = 400 // * width of sim screen
+	screenHeight = 400 // * height of sim screen
+	maxForce     = 1.0 // * constant for boid speed/movement
+	numBoids     = 250 // * number of boids
 )
 
-type Game struct{
-	boids []*boid.Boid // collection of boidss
-	op ebiten.DrawImageOptions
-	inited  bool // has the game initialized?
+type Game struct {
+	boids  []*boid.Boid // collection of boidss
+	op     ebiten.DrawImageOptions
+	inited bool // has the game initialized?
 }
 
-// general inizialiation that create the boids image 
+// general inizialiation that create the boids image
 func init() {
 	fmt.Println("Loading image")
 	boid, _, err := ebitenutil.NewImageFromFile("../pkg/draw/chevron.png")
@@ -42,7 +42,7 @@ func init() {
 	fmt.Println("Image loaded")
 
 	w, h := boid.Size()
-	boidImage = ebiten.NewImage(w / 2, h / 2)
+	boidImage = ebiten.NewImage(w/2, h/2)
 	op := &ebiten.DrawImageOptions{}
 	op.ColorM.Scale(1, 1, 1, 1)
 	boidImage.DrawImage(boid, op)
@@ -50,7 +50,7 @@ func init() {
 
 // Game inizialitaion func
 func (g *Game) init() {
-	defer func ()  {
+	defer func() {
 		g.inited = true // init game
 	}()
 
@@ -61,17 +61,17 @@ func (g *Game) init() {
 	// give boids random V (x; y), O (x; y) and assign image width and height
 	for i := range g.boids {
 		w, h := boidImage.Size()
-		x, y := rand.Float64()*float64(screenWidth-w/2), rand.Float64()*float64(screenWidth-h/2)		
+		x, y := rand.Float64()*float64(screenWidth-w/2), rand.Float64()*float64(screenWidth-h/2)
 		min, max := -maxForce, maxForce
 		vx, vy := rand.Float64()*(max-min)+min, rand.Float64()*(max-min)+min
 		g.boids[i] = &boid.Boid{
-			ImageWidth: w/2,
-			ImageHeight: h/2,
-			V: vector.Vector{X: vx, Y: vy},
-			O: vector.Vector{X: x, Y: y},
+			ImageWidth:  w / 2,
+			ImageHeight: h / 2,
+			V:           vector.Vector{X: vx, Y: vy},
+			O:           vector.Vector{X: x, Y: y},
 		}
 	}
-	
+
 }
 
 // Update the boids position
@@ -104,7 +104,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
 }
 
 func Main() {
-	ebiten.SetWindowSize(screenWidth * 2, screenHeight * 2)
+	ebiten.SetWindowSize(screenWidth*2, screenHeight*2)
 	ebiten.SetWindowTitle("Boids")
 	if err := ebiten.RunGame(&Game{}); err != nil {
 		log.Fatal(err)
