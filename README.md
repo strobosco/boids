@@ -2,6 +2,9 @@
 
 Attempt at recreating the boids simulation by Craig Reynolds in Golang. 
 
+!! Attempting to add viewing angle to findNeighbors() which will make
+the simulation(hopefully) more realistic!!
+
 ## Rules
 
 The three rules that determine the boid's movements are 
