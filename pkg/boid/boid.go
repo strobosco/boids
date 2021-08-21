@@ -1,6 +1,10 @@
+// + Viewing angle seems to be working even though I don't know how to check it
+
 package boid
 
 import (
+	"math"
+
 	"github.com/strobosco/boids/pkg/constants"
 	"github.com/strobosco/boids/pkg/vector"
 )
@@ -27,10 +31,40 @@ const (
 	cohesionIndex    = constants.CohesionIndex    // * range at which cohesion is taken into account
 )
 
+func popNeighbor(slice []*Boid, i int) []*Boid {
+	new := []*Boid{}
+	for id, element := range slice {
+		if id != i {
+			new = append(new, element)
+		}
+	}
+	return new
+}
+
+func (s *Boid) inView(neighbors []*Boid) []*Boid {
+
+	boidAlfa := math.Atan((s.V.Y * math.Pi) / (s.V.X * 180))
+	boidAlfa = (180 * boidAlfa) / math.Pi
+	m1, m2 := boidAlfa-45, boidAlfa+45
+
+	for id, neighbor := range neighbors {
+		neighborM := (neighbor.O.Y - s.O.Y) / (neighbor.O.X - s.O.X)
+
+		if neighborM*neighbor.O.X < m1*neighbor.O.X && neighborM*neighbor.O.X > m2*neighbor.O.X {
+			neighbors = popNeighbor(neighbors, id)
+		}
+		if neighbor.O.Y/neighborM < neighbor.O.Y/m1 && neighbor.O.Y/neighborM > neighbor.O.Y/m2 {
+			neighbors = popNeighbor(neighbors, id)
+		}
+	}
+
+	return neighbors
+}
+
 /*
 * Function that checks if the boid is within the edges of the screen.
-* Could change and include mx = difference between screen width/height
-* and the image width/height.
+* (could change and include mx = difference between screen width/height
+* and the image width/height)
  */
 func (s *Boid) CheckEdges() {
 	if s.O.X < 0 {
@@ -59,6 +93,8 @@ func (s *Boid) FindNeighbors(boids []*Boid) []*Boid {
 			neighbors = append(neighbors, neighbor)
 		}
 	}
+
+	s.inView(neighbors)
 
 	return neighbors
 }
