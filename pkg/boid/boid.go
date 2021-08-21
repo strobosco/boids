@@ -1,6 +1,7 @@
 package boid
 
 import (
+	"github.com/strobosco/boids/pkg/constants"
 	"github.com/strobosco/boids/pkg/vector"
 )
 
@@ -16,14 +17,14 @@ type Boid struct {
 }
 
 const (
-	screenWidth      = 400   // * width of sim screen
-	screenHeight     = 400   // * height of sim screen
-	maxSpeed         = 4.0   // * max boid speed
-	maxForce         = 1.0   // * constant for boid movement
-	perceptionRadius = 100.0 // * range at which boids can sense other boids
-	separationIndex  = 50.0  // * range at which separation is taken into account
-	alignmentIndex   = 75.0  // * range at which alignment is taken into account
-	cohesionIndex    = 100.0 // * range at which cohesion is taken into account
+	screenWidth      = constants.ScreenWidth      // * width of sim screen
+	screenHeight     = constants.ScreenHeight     // * height of sim screen
+	maxSpeed         = constants.MaxSpeed         // * max boid speed
+	maxForce         = constants.MaxForce         // * constant for boid movement
+	perceptionRadius = constants.PerceptionRadius // * range at which boids can sense other boids
+	separationIndex  = constants.SeparationIndex  // * range at which separation is taken into account
+	alignmentIndex   = constants.AlignmentIndex   // * range at which alignment is taken into account
+	cohesionIndex    = constants.CohesionIndex    // * range at which cohesion is taken into account
 )
 
 /*
