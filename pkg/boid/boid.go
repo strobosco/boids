@@ -94,7 +94,7 @@ func (s *Boid) FindNeighbors(boids []*Boid) []*Boid {
 		}
 	}
 
-	s.inView(neighbors)
+	neighbors = s.inView(neighbors)
 
 	return neighbors
 }
