@@ -9,5 +9,5 @@ const (
 	SeparationIndex  = 50.0  // * range at which separation is taken into account
 	AlignmentIndex   = 75.0  // * range at which alignment is taken into account
 	CohesionIndex    = 100.0 // * range at which cohesion is taken into account
-	NumBoids         = 250   // * number of boids
+	NumBoids         = 400   // * number of boids
 )
