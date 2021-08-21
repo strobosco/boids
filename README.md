@@ -16,11 +16,12 @@ The three rules that determine the boid's movements are
 
 ```
 boids
-+-- cmd         // contains the main entry file to run (main.go)
++-- cmd           // contains the main entry file to run (main.go)
 |
 +-- pkg
 |  |
-|  +-- boid     // contains complete boid logic
-|  +-- draw     // contains ebiten drawing functions
-|  +-- vector   // contains vector math
+|  +-- boid       // contains complete boid logic
+|  +-- draw       // contains ebiten drawing functions
+|  +-- vector     // contains vector math
+|  +-- constants  // contains constants
 ```
