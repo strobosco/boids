@@ -12,6 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/strobosco/boids/pkg/boid"
+	"github.com/strobosco/boids/pkg/constants"
 	"github.com/strobosco/boids/pkg/vector"
 )
 
@@ -20,10 +21,10 @@ var (
 )
 
 const (
-	screenWidth  = 400 // * width of sim screen
-	screenHeight = 400 // * height of sim screen
-	maxForce     = 1.0 // * constant for boid speed/movement
-	numBoids     = 250 // * number of boids
+	screenWidth  = constants.ScreenWidth  // * width of sim screen
+	screenHeight = constants.ScreenHeight // * height of sim screen
+	maxForce     = constants.MaxForce     // * constant for boid movement
+	numBoids     = constants.NumBoids     // * number of boids
 )
 
 type Game struct {
