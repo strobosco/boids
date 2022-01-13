@@ -41,19 +41,44 @@ func popNeighbor(slice []*Boid, i int) []*Boid {
 	return new
 }
 
+/*
+* DISCLAIMER:
+	The first function (currently commented out) was devised by myself but
+	unfortunately I don't remember the implementation anymore (its been a few months).
+	The second function comes from here (https://stackoverflow.com/questions/65265444/flocking-boids-algorithm-field-of-view-specified-by-angle-in-3d)
+	and seems to work.
+
+	Now, although the second function seems more mathematically correct it seems to be much slower. To
+	get similar performance I had to halve the number of boids in the screen, from 400 to 200.
+*/
+
 func (s *Boid) inView(neighbors []*Boid) []*Boid {
 
-	boidAlfa := math.Atan((s.V.Y * math.Pi) / (s.V.X * 180))
-	boidAlfa = (180 * boidAlfa) / math.Pi
-	m1, m2 := boidAlfa-45, boidAlfa+45
+	/* FUNCTION 1
 
+	// boidAlfa := math.Atan((s.V.Y * math.Pi) / (s.V.X * 180))
+	// boidAlfa = (180 * boidAlfa) / math.Pi
+	// m1, m2 := boidAlfa-45, boidAlfa+45
+
+	// for id, neighbor := range neighbors {
+	// 	neighborM := (neighbor.O.Y - s.O.Y) / (neighbor.O.X - s.O.X)
+	// 	if neighborM*neighbor.O.X < m1*neighbor.O.X && neighborM*neighbor.O.X > m2*neighbor.O.X {
+	// 		neighbors = popNeighbor(neighbors, id)
+	// 	}
+	// 	if neighbor.O.Y/neighborM < neighbor.O.Y/m1 && neighbor.O.Y/neighborM > neighbor.O.Y/m2 {
+	// 		neighbors = popNeighbor(neighbors, id)
+	// 	}
+	// }
+
+	*/
+
+	// FUNCTION 2
+	
+	const viewingAngle = 45
 	for id, neighbor := range neighbors {
-		neighborM := (neighbor.O.Y - s.O.Y) / (neighbor.O.X - s.O.X)
-
-		if neighborM*neighbor.O.X < m1*neighbor.O.X && neighborM*neighbor.O.X > m2*neighbor.O.X {
-			neighbors = popNeighbor(neighbors, id)
-		}
-		if neighbor.O.Y/neighborM < neighbor.O.Y/m1 && neighbor.O.Y/neighborM > neighbor.O.Y/m2 {
+		cos1 := (s.V.X*(neighbor.O.X-s.O.X) + s.V.Y*(neighbor.O.Y-s.O.Y)) / (math.Sqrt(s.V.X*s.V.X+s.V.Y*s.V.Y) * math.Sqrt(math.Pow((neighbor.O.X-s.O.X), 2)+math.Pow((neighbor.O.Y-s.O.Y), 2)))
+		
+		if cos1 < math.Cos(viewingAngle * math.Pi / 180) {
 			neighbors = popNeighbor(neighbors, id)
 		}
 	}
