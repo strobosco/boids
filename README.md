@@ -1,9 +1,8 @@
 # Boids Simulation
 
-Attempt at recreating the boids simulation by Craig Reynolds in Golang. 
+Recreation of Craig Reynold's boid simulation in Golang.
 
-!! Attempting to add viewing angle to findNeighbors() which will make
-the simulation (hopefully) more realistic !!
+Attempt at recreating the boids simulation by Craig Reynolds in Golang.
 
 ## Rules
 
